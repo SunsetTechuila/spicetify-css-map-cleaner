@@ -56,8 +56,10 @@ function Remove-OutdatedMappings {
     begin {
         $initialCssMap = Get-Content -Path $CssMapPath -Raw | ConvertFrom-Json -AsHashtable
         $outdatedCssMap = $initialCssMap.Clone()
+        $actualCssMap = $initialCssMap.Clone()
         $classesToFind = $cssMap.Keys
         $xpuiFolders = Get-ChildItem -Path $XpuiPath -Directory
+        Write-Host -Object 'Searching for outdated mappings...' -ForegroundColor 'Cyan'
     }
     process {
         $foundClasses = $xpuiFolders | ForEach-Object -ThrottleLimit $env:NUMBER_OF_PROCESSORS -Parallel {
@@ -71,14 +73,21 @@ function Remove-OutdatedMappings {
                 }
             }
         }
-    }
-    end {
+
         $foundClasses | Get-Unique | ForEach-Object -Process {
             $outdatedCssMap.Remove($PSItem) | Out-Null
         }
         foreach ($key in $outdatedCssMap.Keys) {
-            $initialCssMap.Remove($key) | Out-Null
+            $actualCssMap.Remove($key) | Out-Null
         }
-        $initialCssMap | ConvertTo-Json | Set-Content -Path $CssMapPath
+        $actualCssMap | ConvertTo-Json | Set-Content -Path $CssMapPath
+    }
+    end {
+        Write-Host -Object 'Done!' -ForegroundColor 'Green'
+        Write-Host -Object "Initial amount of mapped classes: $($initialCssMap.Count)"
+        Write-Host -Object "Current amount of mapped classes: $($actualCssMap.Count)"
+        Write-Host -Object "Amount of outdated classes: $($outdatedCssMap.Count)"
+        Write-Host -Object 'Removed mappings:'
+        $outdatedCssMap
     }
 }
