@@ -54,27 +54,31 @@ function Remove-OutdatedMappings {
         [string]$XpuiPath
     )
     begin {
-        $cssMap = Get-Content -Path $CssMapPath -Raw | ConvertFrom-Json -AsHashtable
-        $classes = $cssMap.Keys
+        $initialCssMap = Get-Content -Path $CssMapPath -Raw | ConvertFrom-Json -AsHashtable
+        $outdatedCssMap = $initialCssMap.Clone()
+        $classesToFind = $cssMap.Keys
         $xpuiFolders = Get-ChildItem -Path $XpuiPath -Directory
     }
     process {
         $foundClasses = $xpuiFolders | ForEach-Object -ThrottleLimit $env:NUMBER_OF_PROCESSORS -Parallel {
-            $classes = $using:classes
+            $classesToFind = $using:classesToFind
             $PSItem.GetFiles() | ForEach-Object -ThrottleLimit $env:NUMBER_OF_PROCESSORS -Parallel {
                 if ($PSItem.Extension -match 'js|css') {
                     $content = Get-Content -Path $PSItem.FullName -Raw
-                    foreach ($class in $using:classes) {
+                    foreach ($class in $using:classesToFind) {
                         if ($content -match $class) { $class }
                     }
                 }
             }
         }
-        $foundClasses | Get-Unique | ForEach-Object -Process {
-            $cssMap.Remove($PSItem) | Out-Null
-        }
     }
     end {
-        $cssMap | ConvertTo-Json | Set-Content -Path "$PSScriptRoot\OutdatedMappings.json"
+        $foundClasses | Get-Unique | ForEach-Object -Process {
+            $outdatedCssMap.Remove($PSItem) | Out-Null
+        }
+        foreach ($key in $outdatedCssMap.Keys) {
+            $initialCssMap.Remove($key) | Out-Null
+        }
+        $initialCssMap | ConvertTo-Json | Set-Content -Path $CssMapPath
     }
 }
