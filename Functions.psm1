@@ -57,7 +57,7 @@ function Remove-OutdatedMappings {
         $initialCssMap = Get-Content -Path $CssMapPath -Raw | ConvertFrom-Json -AsHashtable
         $outdatedCssMap = $initialCssMap.Clone()
         $actualCssMap = $initialCssMap.Clone()
-        $classesToFind = $cssMap.Keys
+        $classesToFind = $initialCssMap.Keys
         $xpuiFolders = Get-ChildItem -Path $XpuiPath -Directory
         Write-Host -Object 'Searching for outdated mappings...' -ForegroundColor 'Cyan'
     }
