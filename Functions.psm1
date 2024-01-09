@@ -78,7 +78,7 @@ function Remove-OutdatedMappings {
         foreach ($key in $outdatedCssMap.Keys) {
             $actualCssMap.Remove($key) > $null
         }
-        $droppedClasses = foreach ($value in $outdatedCssMap.Values) {
+        $droppedClasses = $outdatedCssMap.Values | Get-Unique | ForEach-Object -Process {
             if (-not ($actualCssMap.ContainsValue($value))) { $value }
         }
 
