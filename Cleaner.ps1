@@ -7,7 +7,7 @@ $Parameters = @{
     Message = 'Please choose a folder where are the xpui folders are located'
     Type = 'Folder'
 }
-$xpuiFoldersPath = Get-PathFromDialog @Parameters
+$xpuiArchivePath = Get-PathFromDialog @Parameters
 
 $Parameters = @{
     Message = 'Please choose a folder where is the css map is located'
@@ -17,5 +17,5 @@ $cssMapPath = Get-PathFromDialog @Parameters
 # endregion Variables
 
 # region Main
-Remove-OutdatedMappings -CssMapPath $cssMapPath -XpuiPath $xpuiFoldersPath
+Remove-OutdatedMappings -CssMapPath $cssMapPath -XpuiArchivePath $xpuiArchivePath
 # endregion Main
